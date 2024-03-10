@@ -1,21 +1,33 @@
+import pprint
+import random
 from collections import defaultdict
+from typing import Any
 
-from dp import policy_iteration
 from gridworld import Gridworld
 from mdp import MDP
-from policy import Policy
-from value_function import TabularValueFunction
+from policy import TabularPolicy
+from qfunction import QTable
 
 
-def eval_policy_first_visit(mdp: MDP, policy: Policy, *, max_iterations: int = 10_000):
-    values = TabularValueFunction()
+def monte_carlo_exploring_starts(
+    mdp: MDP,
+    *,
+    max_iterations: int = 10_000,
+    options: dict[str, Any] | None = None,
+):
+    policy = TabularPolicy(mdp.get_actions()[0])
+    qtable = QTable()
     returns = defaultdict(lambda: [])
     for _ in range(max_iterations):
         episode = []
-        state, _ = mdp.reset()
+        state, _ = mdp.reset(options=options)
         done = False
         while not done:
-            action = policy.pick_action(state)
+            if len(episode) == 0:
+                action = random.choice(mdp.get_actions(state))
+            else:
+                action = policy.pick_action(state)
+
             next_state, reward, terminated, truncated, _ = mdp.step(action)
             episode.append((state, action, reward))
             state = next_state
@@ -24,24 +36,35 @@ def eval_policy_first_visit(mdp: MDP, policy: Policy, *, max_iterations: int = 1
         g = 0
         for i, (state, action, reward) in enumerate(reversed(episode)):
             g = mdp.get_discount_factor() * g + reward
-            if is_first_visit(state, len(episode) - 1 - i, episode):
-                returns[state].append(g)
-                values.set(state, sum(returns[state]) / len(returns[state]))
+            if is_first_visit(state, action, len(episode) - 1 - i, episode):
+                returns[(state, action)].append(g)
+                qtable.set(
+                    state,
+                    action,
+                    sum(returns[(state, action)]) / len(returns[(state, action)]),
+                )
 
-    return values
+                max_value = -float("inf")
+                for action in mdp.get_actions(state):
+                    value = qtable.get(state, action)
+                    if value > max_value:
+                        max_value = value
+                        policy.update(state, action)
+
+    return policy, qtable
 
 
-def is_first_visit(target_state, target_index, episode):
-    for state, _, _ in episode[:target_index]:
-        if state == target_state:
+def is_first_visit(target_state, target_action, target_index, episode):
+    for state, action, _ in episode[:target_index]:
+        if state == target_state and action == target_action:
             return False
     return True
 
 
 if __name__ == "__main__":
     env = Gridworld(4, 3, trap_positions=[(3, 1)], wall_positions=[(1, 1)])
-    policy, values1 = policy_iteration(env)
-    values2 = eval_policy_first_visit(env, policy)
+    policy, qtable = monte_carlo_exploring_starts(
+        env, options={"randomize_position": True}
+    )
     print(env.visualize_policy(policy))
-    print(env.visualize_value_function(values1))
-    print(env.visualize_value_function(values2))
+    pprint.pprint(qtable.table)

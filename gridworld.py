@@ -63,7 +63,14 @@ class Gridworld(MDP):
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed, options=options)
-        self.position = self.initial_position
+
+        if options is not None and options["randomize_position"]:
+            self.position = tuple(self.np_random.choice(self.get_states()))
+            while self.position == self.goal_position:
+                self.position = tuple(self.np_random.choice(self.get_states()))
+        else:
+            self.position = self.initial_position
+
         return self.position, {}
 
     def step(self, action):
