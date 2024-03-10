@@ -17,7 +17,7 @@ def monte_carlo_exploring_starts(
 ):
     policy = TabularPolicy(mdp.get_actions()[0])
     qtable = QTable()
-    returns = defaultdict(lambda: [])
+    returns = defaultdict(lambda: (0.0, 0.0))  # (average, count)
     for _ in range(max_iterations):
         episode = []
         state, _ = mdp.reset(options=options)
@@ -37,11 +37,15 @@ def monte_carlo_exploring_starts(
         for i, (state, action, reward) in enumerate(reversed(episode)):
             g = mdp.get_discount_factor() * g + reward
             if is_first_visit(state, action, len(episode) - 1 - i, episode):
-                returns[(state, action)].append(g)
+                average, count = returns[(state, action)]
+                returns[(state, action)] = average, count = (
+                    (average * count + g) / (count + 1),
+                    count + 1,
+                )
                 qtable.set(
                     state,
                     action,
-                    sum(returns[(state, action)]) / len(returns[(state, action)]),
+                    average,
                 )
 
                 max_value = -float("inf")
