@@ -129,6 +129,58 @@ class Gridworld(gym.Env, MDP):
     def get_discount_factor(self):
         return self.gamma
 
+    def visualize_policy(self, policy):
+        frame = "+{}+\n".format("-" * (4 * self.num_cols - 1))
+        for y in range(self.num_rows - 1, -1, -1):
+            frame += "|"
+            for x in range(self.num_cols):
+                position = (x, y)
+                if position == self.goal_position:
+                    symbol = "G"
+                elif position in self.wall_positions:
+                    symbol = "X"
+                else:
+                    action = policy.pick_action(position)
+                    symbol = " "
+                    match action:
+                        case self.ACTION_UP:
+                            symbol = "↑"
+                        case self.ACTION_RIGHT:
+                            symbol = "→"
+                        case self.ACTION_DOWN:
+                            symbol = "↓"
+                        case self.ACTION_LEFT:
+                            symbol = "←"
+
+                frame += " {} |".format(symbol)
+
+            if y == 0:
+                frame += "\n+{}+".format("-" * (4 * self.num_cols - 1))
+            else:
+                frame += "\n{}\n".format("-" * (4 * self.num_cols + 1))
+
+        return frame
+
+    def visualize_value_function(self, value_function):
+        frame = "+{}+\n".format("-" * (7 * self.num_cols - 1))
+        for y in range(self.num_rows - 1, -1, -1):
+            frame += "|"
+            for x in range(self.num_cols):
+                position = (x, y)
+                if position in self.wall_positions:
+                    value = "XXXX"
+                else:
+                    value = "{:.2f}".format(value_function.get(position))
+
+                frame += " {} |".format(value)
+
+            if y == 0:
+                frame += "\n+{}+".format("-" * (7 * self.num_cols - 1))
+            else:
+                frame += "\n{}\n".format("-" * (7 * self.num_cols + 1))
+
+        return frame
+
     @classmethod
     def get_left_right_actions(cls, action):
         return (
