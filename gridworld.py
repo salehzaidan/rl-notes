@@ -3,7 +3,7 @@ import gymnasium as gym
 from mdp import MDP
 
 
-class Gridworld(gym.Env, MDP):
+class Gridworld(MDP):
     ACTION_UP = 0
     ACTION_RIGHT = 1
     ACTION_DOWN = 2

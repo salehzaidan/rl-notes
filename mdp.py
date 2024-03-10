@@ -1,4 +1,7 @@
-class MDP:
+import gymnasium as gym
+
+
+class MDP(gym.Env):
     def get_states(self):
         """Returns all the available states in the MDP."""
         raise NotImplementedError
