@@ -4,6 +4,31 @@ from mdp import MDP
 
 
 class Gridworld(MDP):
+    """Gridworld involves an agent navigating through a 2D grid from the initial
+    position with an objective to reach the goal position. There may be walls in the
+    grid in which the agent may not move to.
+
+    There action space is an integer in range {0, 3} indicating which direction the
+    agent moves.
+
+    - 0: Up
+    - 1: Right
+    - 2: Down
+    - 3: Left
+
+    The observation space is a 2D tuple (x, y) where x and y is the x and y coordinate
+    of the agent's current position. The walls are not included in the observation space.
+
+    By default the agent starts at (0, 0) and the goal is at (M - 1, N - 1), where M and
+    N is the number of columns and rows of the grid respectively.
+
+    A reward of +1 is given when the agent reaches the goal, and -1 if the agent hits a
+    trap. Otherwise there is a default cost of -0.02 each time the agent moves.
+
+    The episode ends when the agent reaches the goal (termination). There are no
+    truncation condition.
+    """
+
     ACTION_UP = 0
     ACTION_RIGHT = 1
     ACTION_DOWN = 2
@@ -23,6 +48,24 @@ class Gridworld(MDP):
         trap_positions=None,
         wall_positions=None,
     ):
+        """Initialize the Gridworld environment.
+
+        Args:
+            `num_cols`: Number of grid columns.
+            `num_rows`: Number of grid rows.
+            `noise_prob`: The noise probability of veering to the side. Defaults to 0.1.
+            `action_cost`: The cost of moving. Defaults to -0.02.
+            `gamma`: The discount factor. Defaults to 0.99.
+            `initial_position`: The initial position of the agent. If `None` then the agent
+                will start at (0, 0). Defaults to `None`.
+            `goal_position`: The goal position. If `None` then the goal will be at
+                (M - 1, N - 1) where M and N is the number of columns and rows respectively.
+                Defaults to `None`.
+            `trap_positions`: List of the trap positions. If `None` then there are no traps.
+                Defaults to `None`.
+            `wall_positions`: List of the wall positions. If `None` then there are no walls.
+                Defaults to `None`.
+        """
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.noise_prob = noise_prob
@@ -137,6 +180,7 @@ class Gridworld(MDP):
         return self.gamma
 
     def visualize_policy(self, policy):
+        """Returns the visualization of the given policy as a string."""
         frame = "+{}+\n".format("-" * (4 * self.num_cols - 1))
         for y in range(self.num_rows - 1, -1, -1):
             frame += "|"
@@ -169,6 +213,7 @@ class Gridworld(MDP):
         return frame
 
     def visualize_value_function(self, value_function):
+        """Returns the visualization of the given value function as a string."""
         frame = "+{}+\n".format("-" * (7 * self.num_cols - 1))
         for y in range(self.num_rows - 1, -1, -1):
             frame += "|"
@@ -190,6 +235,8 @@ class Gridworld(MDP):
 
     @classmethod
     def get_left_right_actions(cls, action):
+        """Returns the direction to the left and right if the given action were to veer
+        to the side."""
         return (
             (action - 1 + cls.NUM_ACTIONS) % cls.NUM_ACTIONS,
             (action + 1) % cls.NUM_ACTIONS,
