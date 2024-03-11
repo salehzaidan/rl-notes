@@ -15,6 +15,20 @@ def sarsa(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
+    """Performs the SARSA on-policy TD algorithm and estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `alpha`: The step size parameter. Defaults to 0.1.
+        `eps`: The ε-greedy parameter. Defaults to 0.01.
+        `max_iterations`: The maximum iteration to generate the episodes.
+            Defaults to 10000.
+        `options`: Options to be passed to `mdp.reset(options=options)`.
+            Defaults to `None`.
+
+    Returns:
+        The estimated optimal policy and action-value function respectively.
+    """
     qtable = QTable()
     for _ in range(max_iterations):
         state, _ = mdp.reset(options=options)
@@ -62,6 +76,20 @@ def q_learning(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
+    """Performs the Q-Learning off-policy TD algorithm and estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `alpha`: The step size parameter. Defaults to 0.1.
+        `eps`: The ε-greedy parameter. Defaults to 0.01.
+        `max_iterations`: The maximum iteration to generate the episodes.
+            Defaults to 10000.
+        `options`: Options to be passed to `mdp.reset(options=options)`.
+            Defaults to `None`.
+
+    Returns:
+        The estimated optimal policy and action-value function respectively.
+    """
     qtable = QTable()
     for _ in range(max_iterations):
         state, _ = mdp.reset(options=options)
