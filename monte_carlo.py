@@ -46,6 +46,11 @@ def monte_carlo_on_policy(
     options: dict[str, Any] | None = None,
 ):
     policy = TabularStochasticPolicy(mdp.get_actions()[0])
+    for state in mdp.get_states():
+        actions = mdp.get_actions(state)
+        for action in actions:
+            policy.update(state, action, eps / len(actions))
+
     qtable = QTable()
     returns = defaultdict(lambda: (0.0, 0.0))  # (average, count)
     for _ in range(max_iterations):
