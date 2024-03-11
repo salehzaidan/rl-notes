@@ -14,6 +14,20 @@ def monte_carlo_exploring_starts(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
+    """Performs the Monte Carlo with Exploring Starts algorithm and estimates the
+    optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `max_iterations`: The maximum iteration to generate the episodes.
+            Defaults to 10000.
+        `options`: Options to be passed to `mdp.reset(options=options)`. Make sure that
+            the environment randomize the initial state of the MDP through this parameter.
+            Defaults to `None`.
+
+    Returns:
+        The estimated optimal policy and action-value function respectively.
+    """
     policy = TabularPolicy(mdp.get_actions()[0])
     qtable = QTable()
     returns = defaultdict(lambda: (0.0, 0.0))  # (average, count)
@@ -45,6 +59,20 @@ def monte_carlo_on_policy(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
+    """Performs the On-policy first-visit Monte Carlo algorithm (with ε-soft policy) and
+    estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `eps`: The ε-greedy parameter for the ε-soft policy. Defaults to 0.01.
+        `max_iterations`: The maximum iteration to generate the episodes.
+            Defaults to 10000.
+        `options`: Options to be passed to `mdp.reset(options=options)`.
+            Defaults to `None`.
+
+    Returns:
+        The estimated optimal policy and action-value function respectively.
+    """
     policy = TabularStochasticPolicy(mdp.get_actions()[0])
     for state in mdp.get_states():
         actions = mdp.get_actions(state)
@@ -89,6 +117,18 @@ def monte_carlo_off_policy(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
+    """Performs the Off-policy Monte Carlo algorithm and estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `max_iterations`: The maximum iteration to generate the episodes.
+            Defaults to 10000.
+        `options`: Options to be passed to `mdp.reset(options=options)`.
+            Defaults to `None`.
+
+    Returns:
+        The estimated optimal policy and action-value function respectively.
+    """
     qtable = QTable(randomize_value=True)
     cumsum = QTable()
     default_action = mdp.get_actions()[0]
@@ -128,6 +168,19 @@ def run_episode(
     start_random_action: bool = False,
     options: dict[str, Any] | None = None,
 ):
+    """Run a single episode with the given policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `policy`: The policy.
+        `start_random_action`: If `True` the first action will be choosen at random.
+            (not from the policy). Defaults to False.
+        `options`: Options to be passed to `mdp.reset(options=options)`.
+            Defaults to `None`.
+
+    Returns:
+        Episode as a list of state, action, and reward tuple.
+    """
     episode = []
     state, _ = mdp.reset(options=options)
     done = False
@@ -146,6 +199,17 @@ def run_episode(
 
 
 def is_first_visit(target_state, target_action, target_index, episode):
+    """Returns wheter the target state-action pair is the first visit in the episode.
+
+    Args:
+        `target_state`: The target state.
+        `target_action`: The target action.
+        `target_index`: The episode index of the state-action pair.
+        `episode`: The episode list.
+
+    Returns:
+        `True` if the state-action pair is the first visit in the episode. `False` otherwise.
+    """
     for state, action, _ in episode[:target_index]:
         if state == target_state and action == target_action:
             return False
