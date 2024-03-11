@@ -89,13 +89,14 @@ def monte_carlo_off_policy(
     max_iterations: int = 10_000,
     options: dict[str, Any] | None = None,
 ):
-    qtable = QTable()
+    qtable = QTable(randomize_value=True)
     cumsum = QTable()
     default_action = mdp.get_actions()[0]
     target_policy = TabularPolicy(default_action)
     behavior_policy = TabularStochasticPolicy(default_action)
     for state in mdp.get_states():
         actions = mdp.get_actions(state)
+        target_policy.update(state, qtable.argmax(state, actions))
         for action in actions:
             behavior_policy.update(state, action, 1.0 / len(actions))
 

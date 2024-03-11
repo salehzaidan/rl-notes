@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 
 
@@ -21,8 +22,10 @@ class QFunction:
 
 
 class QTable(QFunction):
-    def __init__(self, default_value=0.0):
-        self.table = defaultdict(lambda: default_value)
+    def __init__(self, default_value=0.0, *, randomize_value=False):
+        self.table = defaultdict(
+            lambda: random.random() if randomize_value else default_value
+        )
 
     def get(self, state, action):
         return self.table[(state, action)]
