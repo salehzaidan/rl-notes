@@ -4,7 +4,18 @@ from policy import Policy, TabularPolicy
 from value_function import TabularValueFunction, ValueFunction
 
 
-def eval_policy(mdp: MDP, policy: Policy, *, theta: float = 1e-3):
+def policy_evaluation(mdp: MDP, policy: Policy, *, theta: float = 1e-3):
+    """Performs the iterative policy evaluation and estimates the corresponding
+    state-value function.
+
+    Args:
+        `mdp`: The MDP environment.
+        `policy`: The policy to evaluate.
+        `theta`: The estimation accuracy threshold. Defaults to 1e-3.
+
+    Returns:
+        The estimated state-value function of the given policy.
+    """
     values = TabularValueFunction()
     while True:
         delta = 0.0
@@ -22,9 +33,17 @@ def eval_policy(mdp: MDP, policy: Policy, *, theta: float = 1e-3):
 
 
 def policy_iteration(mdp: MDP, **kwargs):
+    """Performs the Policy Iteration algorithm and estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+
+    Returns:
+        The estimated optimal policy and state-value function respectively.
+    """
     policy = TabularPolicy(mdp.get_actions()[0])
     while True:
-        values = eval_policy(mdp, policy, **kwargs)
+        values = policy_evaluation(mdp, policy, **kwargs)
         stable = True
         for state in mdp.get_states():
             old_action = policy.pick_action(state)
@@ -48,6 +67,15 @@ def policy_iteration(mdp: MDP, **kwargs):
 
 
 def derive_policy(mdp: MDP, values: ValueFunction):
+    """Derives the corresponding policy from the given state-value function.
+
+    Args:
+        `mdp`: The MDP environment.
+        `values`: The state-value function.
+
+    Returns:
+        The derived policy.
+    """
     policy = TabularPolicy(mdp.get_actions()[0])
     for state in mdp.get_states():
         max_value = -float("inf")
@@ -64,6 +92,15 @@ def derive_policy(mdp: MDP, values: ValueFunction):
 
 
 def value_iteration(mdp: MDP, theta: float = 1e-3):
+    """Performs the Value Iteration algorithm and estimates the optimal policy.
+
+    Args:
+        `mdp`: The MDP environment.
+        `theta`: The estimation accuracy threshold. Defaults to 1e-3.
+
+    Returns:
+        The estimated optimal policy and state-value function respectively.
+    """
     values = TabularValueFunction()
     while True:
         delta = 0.0
